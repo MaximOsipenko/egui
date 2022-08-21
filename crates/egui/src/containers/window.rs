@@ -612,7 +612,8 @@ fn resize_hover(
 ) -> Option<WindowInteraction> {
     let pointer = ctx.input().pointer.interact_pos()?;
 
-    if ctx.input().pointer.any_down() && !ctx.input().pointer.any_pressed() {
+    let any_down = ctx.input().pointer.any_down();
+    if any_down && !ctx.input().pointer.any_pressed() {
         return None; // already dragging (something)
     }
 

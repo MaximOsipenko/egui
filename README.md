@@ -11,6 +11,8 @@ couple of logs from rust-gdb runs attached in deadlock_logs folder
 rust-gdb target/debug/hello_world_par | tee deadlock_logs/debugn.log
 ```
 
+update: debug_fix1.log -- deadlock after first problem fixed (more rare now).
+
 
 # 🖌 egui: an easy-to-use GUI in pure Rust
 

@@ -1,0 +1,179 @@
+GNU gdb (Ubuntu 10.2-0ubuntu1~18.04~2) 10.2
+Copyright (C) 2021 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Registered pretty printers for UE4 classes
+Reading symbols from target/debug/hello_world_par...
+(gdb) run
+Starting program: /home/max333/mine/third_party/egui/target/debug/hello_world_par
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffeef9b700 (LWP 950986)]
+[New Thread 0x7fffee76a700 (LWP 950987)]
+[New Thread 0x7fffedf49700 (LWP 950988)]
+[New Thread 0x7fffedb3c700 (LWP 950989)]
+[New Thread 0x7fffecf42700 (LWP 950993)]
+
+Thread 1 "hello_world_par" received signal SIGINT, Interrupt.
+syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+(gdb) thread apply all bt
+
+Thread 6 (Thread 0x7fffecf42700 (LWP 950993) "EguiPanelWorker"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x00005555560a8158 in parking_lot_core::thread_parker::imp::ThreadParker::futex_wait (self=0x7fffecf42390, ts=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/thread_parker/linux.rs:112
+#2  0x00005555560a7f5c in parking_lot_core::thread_parker::imp::{impl#0}::park (self=0x7fffecf42390) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/thread_parker/linux.rs:66
+#3  0x00005555560a5666 in parking_lot_core::parking_lot::park::{closure#0}<parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#0}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>, parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#1}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>, parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#2}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>> (thread_data=0x7fffecf42370) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/parking_lot.rs:635
+#4  0x00005555560a4f98 in parking_lot_core::parking_lot::with_thread_data<parking_lot_core::parking_lot::ParkResult, parking_lot_core::parking_lot::park::{closure_env#0}<parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#0}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>, parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#1}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>, parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#2}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>>> (f=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/parking_lot.rs:207
+#5  parking_lot_core::parking_lot::park<parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#0}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>, parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#1}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>, parking_lot::raw_rwlock::{impl#10}::lock_common::{closure_env#2}<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}>> (key=93825017434832, validate=..., before_sleep=..., timed_out=..., park_token=..., timeout=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/parking_lot.rs:600
+#6  0x000055555609a6d4 in parking_lot::raw_rwlock::RawRwLock::lock_common<parking_lot::raw_rwlock::{impl#10}::lock_shared_slow::{closure_env#0}> (self=0x555556d5d2d0, timeout=..., token=..., try_lock=..., validate_flags=8) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot-0.12.1/src/raw_rwlock.rs:1115
+#7  0x0000555556099574 in parking_lot::raw_rwlock::RawRwLock::lock_shared_slow (self=0x555556d5d2d0, recursive=false, timeout=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot-0.12.1/src/raw_rwlock.rs:719
+#8  0x0000555555f58a34 in parking_lot::raw_rwlock::{impl#0}::lock_shared (self=0x555556d5d2d0) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot-0.12.1/src/raw_rwlock.rs:109
+#9  0x0000555555f502b3 in lock_api::rwlock::RwLock<parking_lot::raw_rwlock::RawRwLock, egui::context::ContextImpl>::read<parking_lot::raw_rwlock::RawRwLock, egui::context::ContextImpl> (self=0x555556d5d2d0) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/lock_api-0.4.7/src/rwlock.rs:448
+#10 0x0000555555ee84b4 in epaint::mutex::rw_lock_impl::RwLock<egui::context::ContextImpl>::read<egui::context::ContextImpl> (self=0x555556d5d2d0) at /home/max333/mine/third_party/egui/crates/epaint/src/mutex.rs:136
+#11 egui::context::Context::read (self=0x7fffecf41710) at crates/egui/src/context.rs:172
+#12 0x0000555555eea7ef in egui::context::Context::input (self=0x7fffecf41710) at crates/egui/src/context.rs:524
+#13 0x0000555555ee2b44 in egui::containers::window::window_interaction (ctx=0x7fffecf41710, possible=..., area_layer_id=..., id=..., rect=...) at crates/egui/src/containers/window.rs:587
+#14 0x0000555555669606 in egui::containers::window::Window::show_dyn<()> (self=..., ctx=0x7fffecf41710, add_contents=...) at /home/max333/mine/third_party/egui/crates/egui/src/containers/window.rs:292
+#15 0x0000555555668c25 in egui::containers::window::Window::show<(), hello_world_par::{impl#0}::show::{closure_env#0}> (self=..., ctx=0x7fffecf41710, add_contents=...) at /home/max333/mine/third_party/egui/crates/egui/src/containers/window.rs:244
+#16 0x0000555555676ae5 in hello_world_par::TestPanel::show (self=0x7fffecf415f0, ctx=0x7fffecf41710) at examples/hello_world_par/src/main.rs:23
+#17 0x0000555555663d05 in hello_world_par::new_worker::{closure#0} () at examples/hello_world_par/src/main.rs:56
+#18 0x00005555556626ce in std::sys_common::backtrace::__rust_begin_short_backtrace<hello_world_par::new_worker::{closure_env#0}, ()> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/sys_common/backtrace.rs:122
+#19 0x000055555566f9f1 in std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure#0}<hello_world_par::new_worker::{closure_env#0}, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/mod.rs:498
+#20 0x000055555566fe41 in core::panic::unwind_safe::{impl#23}::call_once<(), std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>> (self=..., _args=()) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/core/src/panic/unwind_safe.rs:271
+#21 0x000055555567a472 in std::panicking::try::do_call<core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>>, ()> (data=0x7fffecf418a8) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panicking.rs:492
+#22 0x000055555567a53b in __rust_try ()
+#23 0x000055555567a3b0 in std::panicking::try<(), core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>>> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panicking.rs:456
+#24 0x0000555555665771 in std::panic::catch_unwind<core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>>, ()> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panic.rs:137
+#25 0x000055555566f7eb in std::thread::{impl#0}::spawn_unchecked_::{closure#1}<hello_world_par::new_worker::{closure_env#0}, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/mod.rs:497
+#26 0x0000555555665ade in core::ops::function::FnOnce::call_once<std::thread::{impl#0}::spawn_unchecked_::{closure_env#1}<hello_world_par::new_worker::{closure_env#0}, ()>, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/core/src/ops/function.rs:227
+#27 0x00005555560e2aa3 in alloc::boxed::{impl#44}::call_once<(), dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/alloc/src/boxed.rs:1861
+#28 alloc::boxed::{impl#44}::call_once<(), alloc::boxed::Box<dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global>, alloc::alloc::Global> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/alloc/src/boxed.rs:1861
+#29 std::sys::unix::thread::{impl#2}::new::thread_start () at library/std/src/sys/unix/thread.rs:108
+#30 0x00007ffff7c57609 in start_thread (arg=<optimized out>) at pthread_create.c:477
+#31 0x00007ffff7a2b163 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+
+Thread 5 (Thread 0x7fffedb3c700 (LWP 950989) "EguiPanelWorker"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x00005555560a8158 in parking_lot_core::thread_parker::imp::ThreadParker::futex_wait (self=0x7fffedb3c390, ts=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/thread_parker/linux.rs:112
+#2  0x00005555560a7f5c in parking_lot_core::thread_parker::imp::{impl#0}::park (self=0x7fffedb3c390) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/thread_parker/linux.rs:66
+#3  0x00005555560a6e22 in parking_lot_core::parking_lot::park::{closure#0}<parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#0}, parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#1}, parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#2}> (thread_data=0x7fffedb3c370) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/parking_lot.rs:635
+#4  0x00005555560a4c1e in parking_lot_core::parking_lot::with_thread_data<parking_lot_core::parking_lot::ParkResult, parking_lot_core::parking_lot::park::{closure_env#0}<parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#0}, parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#1}, parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#2}>> (f=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/parking_lot.rs:207
+#5  parking_lot_core::parking_lot::park<parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#0}, parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#1}, parking_lot::raw_rwlock::{impl#10}::wait_for_readers::{closure_env#2}> (key=93825017434833, validate=..., before_sleep=..., timed_out=..., park_token=..., timeout=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot_core-0.9.3/src/parking_lot.rs:600
+#6  0x0000555556099f78 in parking_lot::raw_rwlock::RawRwLock::wait_for_readers (self=0x555556d5d2d0, timeout=..., prev_value=0) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot-0.12.1/src/raw_rwlock.rs:1013
+#7  0x00005555560992da in parking_lot::raw_rwlock::RawRwLock::lock_exclusive_slow (self=0x555556d5d2d0, timeout=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot-0.12.1/src/raw_rwlock.rs:644
+#8  0x0000555555f58b69 in parking_lot::raw_rwlock::{impl#0}::lock_exclusive (self=0x555556d5d2d0) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/parking_lot-0.12.1/src/raw_rwlock.rs:73
+#9  0x0000555555f502e3 in lock_api::rwlock::RwLock<parking_lot::raw_rwlock::RawRwLock, egui::context::ContextImpl>::write<parking_lot::raw_rwlock::RawRwLock, egui::context::ContextImpl> (self=0x555556d5d2d0) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/lock_api-0.4.7/src/rwlock.rs:480
+#10 0x0000555555ee8504 in epaint::mutex::rw_lock_impl::RwLock<egui::context::ContextImpl>::write<egui::context::ContextImpl> (self=0x555556d5d2d0) at /home/max333/mine/third_party/egui/crates/epaint/src/mutex.rs:141
+#11 egui::context::Context::write (self=0x7fffedb3b710) at crates/egui/src/context.rs:176
+#12 0x0000555555eea86f in egui::context::Context::options (self=0x7fffedb3b710) at crates/egui/src/context.rs:550
+#13 0x0000555555eea9de in egui::context::Context::style (self=0x7fffedb3b710) at crates/egui/src/context.rs:640
+#14 0x0000555555eed10c in egui::context::Context::layer_id_at (self=0x7fffedb3b710, pos=...) at crates/egui/src/context.rs:1001
+#15 0x0000555555ee33da in egui::containers::window::resize_hover (ctx=0x7fffedb3b710, possible=..., area_layer_id=..., rect=...) at crates/egui/src/containers/window.rs:620
+#16 0x000055555566972e in egui::containers::window::Window::show_dyn<()> (self=..., ctx=0x7fffedb3b710, add_contents=...) at /home/max333/mine/third_party/egui/crates/egui/src/containers/window.rs:323
+#17 0x0000555555668c25 in egui::containers::window::Window::show<(), hello_world_par::{impl#0}::show::{closure_env#0}> (self=..., ctx=0x7fffedb3b710, add_contents=...) at /home/max333/mine/third_party/egui/crates/egui/src/containers/window.rs:244
+#18 0x0000555555676ae5 in hello_world_par::TestPanel::show (self=0x7fffedb3b5f0, ctx=0x7fffedb3b710) at examples/hello_world_par/src/main.rs:23
+#19 0x0000555555663d05 in hello_world_par::new_worker::{closure#0} () at examples/hello_world_par/src/main.rs:56
+#20 0x00005555556626ce in std::sys_common::backtrace::__rust_begin_short_backtrace<hello_world_par::new_worker::{closure_env#0}, ()> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/sys_common/backtrace.rs:122
+#21 0x000055555566f9f1 in std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure#0}<hello_world_par::new_worker::{closure_env#0}, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/mod.rs:498
+#22 0x000055555566fe41 in core::panic::unwind_safe::{impl#23}::call_once<(), std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>> (self=..., _args=()) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/core/src/panic/unwind_safe.rs:271
+#23 0x000055555567a472 in std::panicking::try::do_call<core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>>, ()> (data=0x7fffedb3b8a8) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panicking.rs:492
+#24 0x000055555567a53b in __rust_try ()
+#25 0x000055555567a3b0 in std::panicking::try<(), core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>>> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panicking.rs:456
+#26 0x0000555555665771 in std::panic::catch_unwind<core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<hello_world_par::new_worker::{closure_env#0}, ()>>, ()> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panic.rs:137
+#27 0x000055555566f7eb in std::thread::{impl#0}::spawn_unchecked_::{closure#1}<hello_world_par::new_worker::{closure_env#0}, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/mod.rs:497
+#28 0x0000555555665ade in core::ops::function::FnOnce::call_once<std::thread::{impl#0}::spawn_unchecked_::{closure_env#1}<hello_world_par::new_worker::{closure_env#0}, ()>, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/core/src/ops/function.rs:227
+#29 0x00005555560e2aa3 in alloc::boxed::{impl#44}::call_once<(), dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/alloc/src/boxed.rs:1861
+#30 alloc::boxed::{impl#44}::call_once<(), alloc::boxed::Box<dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global>, alloc::alloc::Global> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/alloc/src/boxed.rs:1861
+#31 std::sys::unix::thread::{impl#2}::new::thread_start () at library/std/src/sys/unix/thread.rs:108
+#32 0x00007ffff7c57609 in start_thread (arg=<optimized out>) at pthread_create.c:477
+#33 0x00007ffff7a2b163 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+
+Thread 4 (Thread 0x7fffedf49700 (LWP 950988) "hello_world_par"):
+#0  0x00007ffff7a1e9cf in __GI___poll (fds=0x7fffedf476f0, nfds=1, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x0000555555dd8eba in nix::poll::poll (fds=&mut [nix::poll::PollFd](size=1) = {...}, timeout=-1) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/nix-0.22.3/src/poll.rs:120
+#2  0x00005555558db6b2 in x11rb::rust_connection::stream::{impl#4}::poll (self=0x555556707018, mode=x11rb::rust_connection::stream::PollMode::Readable) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/x11rb-0.9.0/src/rust_connection/stream.rs:394
+#3  0x0000555555875c7c in x11rb::rust_connection::RustConnection<x11rb::rust_connection::stream::DefaultStream>::read_packet_and_enqueue<x11rb::rust_connection::stream::DefaultStream> (self=0x555556706e00, inner=..., mode=x11rb::rust_connection::BlockingMode::Blocking) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/x11rb-0.9.0/src/rust_connection/mod.rs:392
+#4  0x00005555558778a7 in x11rb::rust_connection::{impl#3}::wait_for_raw_event_with_sequence<x11rb::rust_connection::stream::DefaultStream> (self=0x555556706e00) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/x11rb-0.9.0/src/rust_connection/mod.rs:626
+#5  0x0000555555873ddc in x11rb::connection::Connection::wait_for_event_with_sequence<x11rb::rust_connection::RustConnection<x11rb::rust_connection::stream::DefaultStream>> (self=0x555556706e00) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/x11rb-0.9.0/src/connection.rs:312
+#6  0x0000555555873956 in x11rb::connection::Connection::wait_for_event<x11rb::rust_connection::RustConnection<x11rb::rust_connection::stream::DefaultStream>> (self=0x555556706e00) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/x11rb-0.9.0/src/connection.rs:302
+#7  0x000055555585f5ed in arboard::x11_clipboard::serve_requests (clipboard=Arc(strong=3, weak=0) = {...}) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/arboard-2.1.1/src/x11_clipboard.rs:692
+#8  0x0000555555860f2c in arboard::x11_clipboard::{impl#2}::new::{closure#0} () at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/arboard-2.1.1/src/x11_clipboard.rs:786
+#9  0x000055555586f85e in std::sys_common::backtrace::__rust_begin_short_backtrace<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/sys_common/backtrace.rs:122
+#10 0x000055555588d26b in std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure#0}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/mod.rs:498
+#11 0x000055555586f63f in core::panic::unwind_safe::{impl#23}::call_once<(), std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()>> (self=..., _args=()) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/core/src/panic/unwind_safe.rs:271
+#12 0x000055555589b01e in std::panicking::try::do_call<core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()>>, ()> (data=0x7fffedf48950) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panicking.rs:492
+#13 0x000055555589e37b in __rust_try ()
+#14 0x000055555589af84 in std::panicking::try<(), core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()>>> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panicking.rs:456
+#15 0x000055555588bd9f in std::panic::catch_unwind<core::panic::unwind_safe::AssertUnwindSafe<std::thread::{impl#0}::spawn_unchecked_::{closure#1}::{closure_env#0}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()>>, ()> (f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/panic.rs:137
+#16 0x000055555588d07d in std::thread::{impl#0}::spawn_unchecked_::{closure#1}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/mod.rs:497
+#17 0x000055555589b33f in core::ops::function::FnOnce::call_once<std::thread::{impl#0}::spawn_unchecked_::{closure_env#1}<arboard::x11_clipboard::{impl#2}::new::{closure_env#0}, ()>, ()> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/core/src/ops/function.rs:227
+#18 0x00005555560e2aa3 in alloc::boxed::{impl#44}::call_once<(), dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/alloc/src/boxed.rs:1861
+#19 alloc::boxed::{impl#44}::call_once<(), alloc::boxed::Box<dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global>, alloc::alloc::Global> () at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/alloc/src/boxed.rs:1861
+#20 std::sys::unix::thread::{impl#2}::new::thread_start () at library/std/src/sys/unix/thread.rs:108
+#21 0x00007ffff7c57609 in start_thread (arg=<optimized out>) at pthread_create.c:477
+#22 0x00007ffff7a2b163 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+
+Thread 3 (Thread 0x7fffee76a700 (LWP 950987) "hello_wo:gdrv0"):
+#0  futex_wait_cancelable (private=<optimized out>, expected=0, futex_word=0x555556636870) at ../sysdeps/nptl/futex-internal.h:183
+#1  __pthread_cond_wait_common (abstime=0x0, clockid=0, mutex=0x555556636820, cond=0x555556636848) at pthread_cond_wait.c:508
+#2  __pthread_cond_wait (cond=0x555556636848, mutex=0x555556636820) at pthread_cond_wait.c:638
+#3  0x00007ffff507d5eb in ?? () from /usr/lib/x86_64-linux-gnu/dri/iris_dri.so
+#4  0x00007ffff507d1eb in ?? () from /usr/lib/x86_64-linux-gnu/dri/iris_dri.so
+#5  0x00007ffff7c57609 in start_thread (arg=<optimized out>) at pthread_create.c:477
+#6  0x00007ffff7a2b163 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+
+Thread 2 (Thread 0x7fffeef9b700 (LWP 950986) "hello_w:disk$0"):
+#0  futex_wait_cancelable (private=<optimized out>, expected=0, futex_word=0x5555567036f8) at ../sysdeps/nptl/futex-internal.h:183
+#1  __pthread_cond_wait_common (abstime=0x0, clockid=0, mutex=0x5555567036a8, cond=0x5555567036d0) at pthread_cond_wait.c:508
+#2  __pthread_cond_wait (cond=0x5555567036d0, mutex=0x5555567036a8) at pthread_cond_wait.c:638
+#3  0x00007ffff507d5eb in ?? () from /usr/lib/x86_64-linux-gnu/dri/iris_dri.so
+#4  0x00007ffff507d1eb in ?? () from /usr/lib/x86_64-linux-gnu/dri/iris_dri.so
+#5  0x00007ffff7c57609 in start_thread (arg=<optimized out>) at pthread_create.c:477
+#6  0x00007ffff7a2b163 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+
+Thread 1 (Thread 0x7ffff787cb40 (LWP 950982) "hello_world_par"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x00005555560db4ea in std::sys::unix::futex::futex_wait () at library/std/src/sys/unix/futex.rs:25
+#2  std::sys_common::thread_parker::futex::Parker::park () at library/std/src/sys_common/thread_parker/futex.rs:50
+#3  std::thread::park () at library/std/src/thread/mod.rs:926
+#4  std::sync::mpsc::blocking::WaitToken::wait () at library/std/src/sync/mpsc/blocking.rs:68
+#5  0x00005555556748e8 in std::sync::mpsc::sync::wait<()> (lock=0x555556d5c258, guard=..., f=0x555555670a50 <std::sync::mpsc::sync::Blocker::BlockedReceiver::{constructor#0}>) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/sync/mpsc/sync.rs:116
+#6  0x0000555555671ff5 in std::sync::mpsc::sync::Packet<()>::recv<()> (self=0x555556d5c250, deadline=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/sync/mpsc/sync.rs:280
+#7  0x000055555566c192 in std::sync::mpsc::Receiver<()>::recv<()> (self=0x555556d58250) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/sync/mpsc/mod.rs:1178
+#8  0x000055555567729f in hello_world_par::{impl#3}::update (self=0x555556d58230, ctx=0x7fffffffc330, _frame=0x7fffffffc2a0) at examples/hello_world_par/src/main.rs:108
+#9  0x00005555556db4d6 in eframe::native::epi_integration::{impl#0}::update::{closure#0} (egui_ctx=0x7fffffffc330) at crates/eframe/src/native/epi_integration.rs:279
+#10 0x00005555557356c7 in egui::context::Context::run<eframe::native::epi_integration::{impl#0}::update::{closure_env#0}> (self=0x7fffffffc330, new_input=..., run_ui=...) at /home/max333/mine/third_party/egui/crates/egui/src/context.rs:204
+#11 0x00005555556e8250 in eframe::native::epi_integration::EpiIntegration::update (self=0x7fffffffc2a0, app=..., window=0x7fffffffc128) at crates/eframe/src/native/epi_integration.rs:277
+#12 0x000055555568db19 in eframe::native::run::glow_integration::{impl#1}::paint (self=0x7fffffffc0d8) at crates/eframe/src/native/run.rs:353
+#13 0x0000555555731e35 in eframe::native::run::run_and_return::{closure#0}<eframe::native::run::glow_integration::GlowWinitApp> (event=..., control_flow=0x7fffffffaf50) at crates/eframe/src/native/run.rs:108
+#14 0x00005555556cb991 in winit::platform_impl::platform::sticky_exit_callback<eframe::native::run::RequestRepaintEvent, eframe::native::run::run_and_return::{closure_env#0}<eframe::native::run::glow_integration::GlowWinitApp>> (evt=..., target=0x55555660d400, control_flow=0x7fffffffaf50, callback=0x7fffffffaf40) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.2/src/platform_impl/linux/mod.rs:849
+#15 0x000055555568fce9 in winit::platform_impl::platform::x11::{impl#2}::run_return::single_iteration<eframe::native::run::RequestRepaintEvent, eframe::native::run::run_and_return::{closure_env#0}<eframe::native::run::glow_integration::GlowWinitApp>> (this=0x7ffff787c820, control_flow=0x7fffffffaf50, cause=0x7fffffffaf80, callback=0x7fffffffaf40) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.2/src/platform_impl/linux/x11/mod.rs:380
+#16 0x00005555556929cd in winit::platform_impl::platform::x11::EventLoop<eframe::native::run::RequestRepaintEvent>::run_return<eframe::native::run::RequestRepaintEvent, eframe::native::run::run_and_return::{closure_env#0}<eframe::native::run::glow_integration::GlowWinitApp>> (self=0x7ffff787c820, callback=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.2/src/platform_impl/linux/x11/mod.rs:488
+#17 0x00005555556cabb6 in winit::platform_impl::platform::EventLoop<eframe::native::run::RequestRepaintEvent>::run_return<eframe::native::run::RequestRepaintEvent, eframe::native::run::run_and_return::{closure_env#0}<eframe::native::run::glow_integration::GlowWinitApp>> (self=0x7ffff787c818, callback=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.2/src/platform_impl/linux/mod.rs:748
+#18 0x000055555568e879 in winit::platform::run_return::{impl#0}::run_return<eframe::native::run::RequestRepaintEvent, eframe::native::run::run_and_return::{closure_env#0}<eframe::native::run::glow_integration::GlowWinitApp>> (self=0x7ffff787c818, event_handler=...) at /home/max333/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.2/src/platform/run_return.rs:62
+#19 0x00005555557315e0 in eframe::native::run::run_and_return<eframe::native::run::glow_integration::GlowWinitApp> (event_loop=0x7ffff787c818, winit_app=...) at crates/eframe/src/native/run.rs:95
+#20 0x000055555572987e in eframe::native::run::glow_integration::run_glow::{closure#0} (event_loop=0x7ffff787c818) at crates/eframe/src/native/run.rs:459
+#21 0x0000555555730fa4 in eframe::native::run::with_event_loop::{closure#0}<eframe::native::run::glow_integration::run_glow::{closure_env#0}> (event_loop=0x7ffff787c810) at crates/eframe/src/native/run.rs:84
+#22 0x000055555574cf62 in std::thread::local::LocalKey<core::cell::RefCell<winit::event_loop::EventLoop<eframe::native::run::RequestRepaintEvent>>>::try_with<core::cell::RefCell<winit::event_loop::EventLoop<eframe::native::run::RequestRepaintEvent>>, eframe::native::run::with_event_loop::{closure_env#0}<eframe::native::run::glow_integration::run_glow::{closure_env#0}>, ()> (self=0x5555565467d8, f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/local.rs:442
+#23 0x000055555574c9dd in std::thread::local::LocalKey<core::cell::RefCell<winit::event_loop::EventLoop<eframe::native::run::RequestRepaintEvent>>>::with<core::cell::RefCell<winit::event_loop::EventLoop<eframe::native::run::RequestRepaintEvent>>, eframe::native::run::with_event_loop::{closure_env#0}<eframe::native::run::glow_integration::run_glow::{closure_env#0}>, ()> (self=0x5555565467d8, f=...) at /rustc/fe5b13d681f25ee6474be29d748c65adcd91f69e/library/std/src/thread/local.rs:418
+#24 0x0000555555730ea4 in eframe::native::run::with_event_loop<eframe::native::run::glow_integration::run_glow::{closure_env#0}> (f=...) at crates/eframe/src/native/run.rs:83
+#25 0x000055555568e4ad in eframe::native::run::glow_integration::run_glow (app_name="My egui App", native_options=0x7fffffffd840, app_creator=...) at crates/eframe/src/native/run.rs:456
+#26 0x0000555555680f7b in eframe::run_native (app_name="My egui App", native_options=..., app_creator=...) at crates/eframe/src/lib.rs:172
+#27 0x0000555555676a24 in hello_world_par::main () at examples/hello_world_par/src/main.rs:8
+(gdb) q
+A debugging session is active.
+
+	Inferior 1 [process 950982] will be killed.
+
+Quit anyway? (y or n) y
