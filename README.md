@@ -1,3 +1,17 @@
+# this fork contains additional hello_world_par example
+to start:
+``` bash
+cargo run -p hello_world_par
+```
+
+but currently interaction with UI when more than one worker exists leads to deadlock
+
+couple of logs from rust-gdb runs attached in deadlock_logs folder
+``` bash
+rust-gdb target/debug/hello_world_par | tee deadlock_logs/debugn.log
+```
+
+
 # 🖌 egui: an easy-to-use GUI in pure Rust
 
 [<img alt="github" src="https://img.shields.io/badge/github-emilk/egui-8da0cb?logo=github" height="20">](https://github.com/emilk/egui)
