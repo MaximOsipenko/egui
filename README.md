@@ -13,6 +13,7 @@ rust-gdb target/debug/hello_world_par | tee deadlock_logs/debugn.log
 
 update: debug_fix1.log -- deadlock after first problem fixed (more rare now).
 
+update 2: after second fix hello_world_par seems to be working without deadlocks (during my test all widgets works with 10 workers and 30 panels).
 
 # 🖌 egui: an easy-to-use GUI in pure Rust
 
