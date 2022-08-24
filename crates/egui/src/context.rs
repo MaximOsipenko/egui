@@ -150,7 +150,7 @@ impl ContextImpl {
 #[derive(Clone)]
 pub struct Context(Arc<ShortRwLockHelper<ContextImpl>>);
 
-// helper struct to enforce users to lock their data more careful
+/// helper struct to enforce users to lock their data more careful
 struct ShortRwLockHelper<T>(RwLock<T>, tracy_client::Client);
 
 impl<T> ShortRwLockHelper<T> {
@@ -159,11 +159,21 @@ impl<T> ShortRwLockHelper<T> {
     }
 
     fn read<R>(&self, reader: impl FnOnce(&T) -> R) -> R {
-        reader(&*self.0.read())
+        let lock = {
+            let _prof_guard = tracy_client::span!("read wait");
+            self.0.read()
+        };
+        let _prof_guard = tracy_client::span!("read");
+        reader(&*lock)
     }
 
     fn write<R>(&self, writer: impl FnOnce(&mut T) -> R) -> R {
-        writer(&mut *self.0.write())
+        let mut lock = {
+            let _prof_guard = tracy_client::span!("write wait");
+            self.0.write()
+        };
+        let _prof_guard = tracy_client::span!("write");
+        writer(&mut *lock)
     }
 }
 

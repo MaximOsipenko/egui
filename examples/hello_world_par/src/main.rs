@@ -2,6 +2,7 @@
 use eframe::egui;
 use std::sync::mpsc;
 use std::thread::JoinHandle;
+use egui::widgets::Spinner;
 
 fn main() {
     let options = eframe::NativeOptions::default();
@@ -20,11 +21,15 @@ struct TestPanel {
 
 impl TestPanel {
     fn show(&mut self, ctx: &egui::Context) {
+        let _prof_guard = tracy_client::span!("TestPanel::show");
         egui::Window::new(&self.title).show(ctx, |ui| {
             ui.heading("My egui Application");
             ui.horizontal(|ui| {
                 ui.label("Your name: ");
                 ui.text_edit_singleline(&mut self.name);
+
+                use eframe::egui::Widget;
+                Spinner::new().ui(ui); // to enforce stable fps
             });
             ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
             if ui.button("Click each year").clicked() {

@@ -9,3 +9,5 @@ publish = false
 
 [dependencies]
 eframe = { path = "../../crates/eframe" }
+
+tracy-client = { version = "0.14.*", path = "../../../rust_tracy_client/tracy-client" }
