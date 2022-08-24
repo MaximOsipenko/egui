@@ -94,7 +94,7 @@ impl Widget for ProgressBar {
 
             let (dark, bright) = (0.7, 1.0);
             let color_factor = if animate {
-                lerp(dark..=bright, ui.input().time.cos().abs())
+                lerp(dark..=bright, ui.input(|i| i.time).cos().abs())
             } else {
                 bright
             };
@@ -108,8 +108,8 @@ impl Widget for ProgressBar {
 
             if animate {
                 let n_points = 20;
-                let start_angle = ui.input().time * std::f64::consts::TAU;
-                let end_angle = start_angle + 240f64.to_radians() * ui.input().time.sin();
+                let start_angle = ui.input(|i| i.time) * std::f64::consts::TAU;
+                let end_angle = start_angle + 240f64.to_radians() * ui.input(|i| i.time).sin();
                 let circle_radius = rounding - 2.0;
                 let points: Vec<Pos2> = (0..n_points)
                     .map(|i| {

@@ -43,11 +43,11 @@ impl Default for State {
 
 impl State {
     pub fn load(ctx: &Context, id: Id) -> Option<Self> {
-        ctx.data().get_persisted(id)
+        ctx.data_mut(|d| d.get_persisted(id))
     }
 
     pub fn store(self, ctx: &Context, id: Id) {
-        ctx.data().insert_persisted(id, self);
+        ctx.data_mut(|d| d.insert_persisted(id, self));
     }
 }
 
@@ -529,7 +529,9 @@ impl Prepared {
         for d in 0..2 {
             if has_bar[d] {
                 // We take the scroll target so only this ScrollArea will use it:
-                let scroll_target = content_ui.ctx().frame_state().scroll_target[d].take();
+                let scroll_target = content_ui
+                    .ctx()
+                    .frame_state_mut(|state| state.scroll_target[d].take());
                 if let Some((scroll, align)) = scroll_target {
                     let min = content_ui.min_rect().min[d];
                     let clip_rect = content_ui.clip_rect();
@@ -588,7 +590,7 @@ impl Prepared {
                     // HACK for when we have a vertical-only scroll area in a top level panel,
                     // and that panel is not wide enough for the contents.
                     // This code ensures we still see the scroll bar!
-                    let max = ui.input().screen_rect().max[d]
+                    let max = ui.input(|i| i.screen_rect().max[d])
                         - current_bar_use[d]
                         - ui.spacing().item_spacing[d];
                     inner_rect.max[d] = inner_rect.max[d].at_most(max);
@@ -618,8 +620,8 @@ impl Prepared {
             if content_response.dragged() {
                 for d in 0..2 {
                     if has_bar[d] {
-                        state.offset[d] -= ui.input().pointer.delta()[d];
-                        state.vel[d] = ui.input().pointer.velocity()[d];
+                        state.offset[d] -= ui.input(|i| i.pointer.delta()[d]);
+                        state.vel[d] = ui.input(|i| i.pointer.velocity()[d]);
                         state.scroll_stuck_to_end[d] = false;
                     } else {
                         state.vel[d] = 0.0;
@@ -628,7 +630,7 @@ impl Prepared {
             } else {
                 let stop_speed = 20.0; // Pixels per second.
                 let friction_coeff = 1000.0; // Pixels per second squared.
-                let dt = ui.input().unstable_dt;
+                let dt = ui.input(|i| i.unstable_dt);
 
                 let friction = friction_coeff * dt;
                 if friction > state.vel.length() || state.vel.length() < stop_speed {
@@ -647,18 +649,20 @@ impl Prepared {
         if scrolling_enabled && ui.rect_contains_pointer(outer_rect) {
             for d in 0..2 {
                 if has_bar[d] {
-                    let mut frame_state = ui.ctx().frame_state();
-                    let scroll_delta = frame_state.scroll_delta;
+                    ui.ctx().frame_state_mut(|frame_state| {
+                        let scroll_delta = frame_state.scroll_delta;
 
-                    let scrolling_up = state.offset[d] > 0.0 && scroll_delta[d] > 0.0;
-                    let scrolling_down = state.offset[d] < max_offset[d] && scroll_delta[d] < 0.0;
+                        let scrolling_up = state.offset[d] > 0.0 && scroll_delta[d] > 0.0;
+                        let scrolling_down =
+                            state.offset[d] < max_offset[d] && scroll_delta[d] < 0.0;
 
-                    if scrolling_up || scrolling_down {
-                        state.offset[d] -= scroll_delta[d];
-                        // Clear scroll delta so no parent scroll will use it.
-                        frame_state.scroll_delta[d] = 0.0;
-                        state.scroll_stuck_to_end[d] = false;
-                    }
+                        if scrolling_up || scrolling_down {
+                            state.offset[d] -= scroll_delta[d];
+                            // Clear scroll delta so no parent scroll will use it.
+                            frame_state.scroll_delta[d] = 0.0;
+                            state.scroll_stuck_to_end[d] = false;
+                        }
+                    });
                 }
             }
         }

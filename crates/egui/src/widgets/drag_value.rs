@@ -185,15 +185,15 @@ impl<'a> Widget for DragValue<'a> {
             custom_formatter,
         } = self;
 
-        let shift = ui.input().modifiers.shift_only();
-        let is_slow_speed = shift && ui.memory().is_being_dragged(ui.next_auto_id());
+        let is_slow_speed = ui.input(|i| i.modifiers.shift_only())
+            && ui.memory(|mem| mem.is_being_dragged(ui.next_auto_id()));
 
         let old_value = get(&mut get_set_value);
         let value = clamp_to_range(old_value, clamp_range.clone());
         if old_value != value {
             set(&mut get_set_value, value);
         }
-        let aim_rad = ui.input().aim_radius() as f64;
+        let aim_rad = ui.input(|i| i.aim_radius() as f64);
 
         let auto_decimals = (aim_rad / speed.abs()).log10().ceil().clamp(0.0, 15.0) as usize;
         let auto_decimals = auto_decimals + is_slow_speed as usize;
@@ -212,15 +212,12 @@ impl<'a> Widget for DragValue<'a> {
         };
 
         let kb_edit_id = ui.next_auto_id();
-        let is_kb_editing = ui.memory().has_focus(kb_edit_id);
+        let is_kb_editing = ui.memory(|mem| mem.has_focus(kb_edit_id));
 
         let mut response = if is_kb_editing {
             let button_width = ui.spacing().interact_size.x;
             let mut value_text = ui
-                .memory()
-                .drag_value
-                .edit_string
-                .take()
+                .memory_mut(|mem| mem.drag_value.edit_string.take())
                 .unwrap_or(value_text);
             let response = ui.add(
                 TextEdit::singleline(&mut value_text)
@@ -232,11 +229,13 @@ impl<'a> Widget for DragValue<'a> {
                 let parsed_value = clamp_to_range(parsed_value, clamp_range);
                 set(&mut get_set_value, parsed_value);
             }
-            if ui.input().key_pressed(Key::Enter) {
-                ui.memory().surrender_focus(kb_edit_id);
-                ui.memory().drag_value.edit_string = None;
+            if ui.input(|i| i.key_pressed(Key::Enter)) {
+                ui.memory_mut(|mem| {
+                    mem.surrender_focus(kb_edit_id);
+                    mem.drag_value.edit_string = None;
+                })
             } else {
-                ui.memory().drag_value.edit_string = Some(value_text);
+                ui.memory_mut(|mem| mem.drag_value.edit_string = Some(value_text));
             }
             response
         } else {
@@ -260,10 +259,12 @@ impl<'a> Widget for DragValue<'a> {
             }
 
             if response.clicked() {
-                ui.memory().request_focus(kb_edit_id);
-                ui.memory().drag_value.edit_string = None; // Filled in next frame
+                ui.memory_mut(|mem| {
+                    mem.request_focus(kb_edit_id);
+                    mem.drag_value.edit_string = None; // Filled in next frame
+                })
             } else if response.dragged() {
-                ui.output().cursor_icon = CursorIcon::ResizeHorizontal;
+                ui.output_mut(|o| o.cursor_icon = CursorIcon::ResizeHorizontal);
 
                 let mdelta = response.drag_delta();
                 let delta_points = mdelta.x - mdelta.y; // Increase to the right and up
@@ -273,7 +274,7 @@ impl<'a> Widget for DragValue<'a> {
                 let delta_value = delta_points as f64 * speed;
 
                 if delta_value != 0.0 {
-                    let mut drag_state = std::mem::take(&mut ui.memory().drag_value);
+                    let mut drag_state = ui.memory_mut(|mem| std::mem::take(&mut mem.drag_value));
 
                     // Since we round the value being dragged, we need to store the full precision value in memory:
                     let stored_value = (drag_state.last_dragged_id == Some(response.id))
@@ -294,13 +295,14 @@ impl<'a> Widget for DragValue<'a> {
 
                     drag_state.last_dragged_id = Some(response.id);
                     drag_state.last_dragged_value = Some(stored_value);
-                    ui.memory().drag_value = drag_state;
+                    ui.memory_mut(|mem| mem.drag_value = drag_state);
                 }
             } else if response.has_focus() {
-                let change = ui.input().num_presses(Key::ArrowUp) as f64
-                    + ui.input().num_presses(Key::ArrowRight) as f64
-                    - ui.input().num_presses(Key::ArrowDown) as f64
-                    - ui.input().num_presses(Key::ArrowLeft) as f64;
+                let change = ui.input(|i| {
+                    i.num_presses(Key::ArrowUp) as f64 - i.num_presses(Key::ArrowDown) as f64
+                        + i.num_presses(Key::ArrowRight) as f64
+                        - i.num_presses(Key::ArrowLeft) as f64
+                });
 
                 if change != 0.0 {
                     let new_value = value + speed * change;

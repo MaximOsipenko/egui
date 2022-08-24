@@ -31,11 +31,11 @@ pub(crate) struct BarState {
 
 impl BarState {
     fn load(ctx: &Context, bar_id: Id) -> Self {
-        ctx.data().get_temp::<Self>(bar_id).unwrap_or_default()
+        ctx.data_mut(|d| d.get_temp::<Self>(bar_id).unwrap_or_default())
     }
 
     fn store(self, ctx: &Context, bar_id: Id) {
-        ctx.data().insert_temp(bar_id, self);
+        ctx.data_mut(|d| d.insert_temp(bar_id, self));
     }
 
     /// Show a menu at pointer if primary-clicked response.
@@ -278,33 +278,33 @@ impl MenuRoot {
         id: Id,
     ) -> MenuResponse {
         // Lock the input once for the whole function call (see https://github.com/emilk/egui/pull/1380).
-        let input = response.ctx.input();
-
-        if (response.clicked() && root.is_menu_open(id)) || input.key_pressed(Key::Escape) {
-            // menu open and button clicked or esc pressed
-            return MenuResponse::Close;
-        } else if (response.clicked() && !root.is_menu_open(id))
-            || (response.hovered() && root.is_some())
-        {
-            // menu not open and button clicked
-            // or button hovered while other menu is open
-            let pos = response.rect.left_bottom();
-            return MenuResponse::Create(pos, id);
-        } else if input.pointer.any_pressed() && input.pointer.primary_down() {
-            if let Some(pos) = input.pointer.interact_pos() {
-                if let Some(root) = root.inner.as_mut() {
-                    if root.id == id {
-                        // pressed somewhere while this menu is open
-                        let menu_state = root.menu_state.read();
-                        let in_menu = menu_state.area_contains(pos);
-                        if !in_menu {
-                            return MenuResponse::Close;
+        response.ctx.input(|input| {
+            if (response.clicked() && root.is_menu_open(id)) || input.key_pressed(Key::Escape) {
+                // menu open and button clicked or esc pressed
+                return MenuResponse::Close;
+            } else if (response.clicked() && !root.is_menu_open(id))
+                || (response.hovered() && root.is_some())
+            {
+                // menu not open and button clicked
+                // or button hovered while other menu is open
+                let pos = response.rect.left_bottom();
+                return MenuResponse::Create(pos, id);
+            } else if input.pointer.any_pressed() && input.pointer.primary_down() {
+                if let Some(pos) = input.pointer.interact_pos() {
+                    if let Some(root) = root.inner.as_mut() {
+                        if root.id == id {
+                            // pressed somewhere while this menu is open
+                            let menu_state = root.menu_state.read();
+                            let in_menu = menu_state.area_contains(pos);
+                            if !in_menu {
+                                return MenuResponse::Close;
+                            }
                         }
                     }
                 }
             }
-        }
-        MenuResponse::Stay
+            MenuResponse::Stay
+        })
     }
 
     /// Interaction with a context menu (secondary clicks).
@@ -314,26 +314,28 @@ impl MenuRoot {
         id: Id,
     ) -> MenuResponse {
         let response = response.interact(Sense::click());
-        let pointer = &response.ctx.input().pointer;
-        if pointer.any_pressed() {
-            if let Some(pos) = pointer.interact_pos() {
-                let mut destroy = false;
-                let mut in_old_menu = false;
-                if let Some(root) = root {
-                    let menu_state = root.menu_state.read();
-                    in_old_menu = menu_state.area_contains(pos);
-                    destroy = root.id == response.id;
-                }
-                if !in_old_menu {
-                    if response.hovered() && pointer.secondary_down() {
-                        return MenuResponse::Create(pos, id);
-                    } else if (response.hovered() && pointer.primary_down()) || destroy {
-                        return MenuResponse::Close;
+        response.ctx.input(|input| {
+            let pointer = &input.pointer;
+            if pointer.any_pressed() {
+                if let Some(pos) = pointer.interact_pos() {
+                    let mut destroy = false;
+                    let mut in_old_menu = false;
+                    if let Some(root) = root {
+                        let menu_state = root.menu_state.read();
+                        in_old_menu = menu_state.area_contains(pos);
+                        destroy = root.id == response.id;
+                    }
+                    if !in_old_menu {
+                        if response.hovered() && pointer.secondary_down() {
+                            return MenuResponse::Create(pos, id);
+                        } else if (response.hovered() && pointer.primary_down()) || destroy {
+                            return MenuResponse::Close;
+                        }
                     }
                 }
             }
-        }
-        MenuResponse::Stay
+            MenuResponse::Stay
+        })
     }
 
     fn handle_menu_response(root: &mut MenuRootManager, menu_response: MenuResponse) {
@@ -556,15 +558,15 @@ impl MenuState {
 
     /// Sense button interaction opening and closing submenu.
     fn submenu_button_interaction(&mut self, ui: &mut Ui, sub_id: Id, button: &Response) {
-        let pointer = &ui.input().pointer.clone();
+        let pointer = ui.input(|i| i.pointer.clone());
         let open = self.is_open(sub_id);
-        if self.moving_towards_current_submenu(pointer) {
+        if self.moving_towards_current_submenu(&pointer) {
             // ensure to repaint once even when pointer is not moving
             ui.ctx().request_repaint();
         } else if !open && button.hovered() {
             let pos = button.rect.right_top();
             self.open_submenu(sub_id, pos);
-        } else if open && !button.hovered() && !self.hovering_current_submenu(pointer) {
+        } else if open && !button.hovered() && !self.hovering_current_submenu(&pointer) {
             self.close_submenu();
         }
     }

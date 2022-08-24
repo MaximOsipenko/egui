@@ -312,7 +312,7 @@ impl<'t> TextEdit<'t> {
             output.response |= ui.interact(frame_rect, id, Sense::click());
         }
         if output.response.clicked() && !output.response.lost_focus() {
-            ui.memory().request_focus(output.response.id);
+            ui.memory_mut(|mem| mem.request_focus(output.response.id));
         }
 
         if frame {
@@ -381,7 +381,7 @@ impl<'t> TextEdit<'t> {
         let prev_text = text.as_str().to_owned();
 
         let font_id = font_selection.resolve(ui.style());
-        let row_height = ui.fonts().row_height(&font_id);
+        let row_height = ui.fonts(|f| f.row_height(&font_id));
         const MIN_WIDTH: f32 = 24.0; // Never make a [`TextEdit`] more narrow than this.
         let available_width = ui.available_width().at_least(MIN_WIDTH);
         let desired_width = desired_width.unwrap_or_else(|| ui.spacing().text_edit_width);
@@ -394,11 +394,12 @@ impl<'t> TextEdit<'t> {
         let font_id_clone = font_id.clone();
         let mut default_layouter = move |ui: &Ui, text: &str, wrap_width: f32| {
             let text = mask_if_password(password, text);
-            ui.fonts().layout_job(if multiline {
+            let layout_job = if multiline {
                 LayoutJob::simple(text, font_id_clone.clone(), text_color, wrap_width)
             } else {
                 LayoutJob::simple_singleline(text, font_id_clone.clone(), text_color)
-            })
+            };
+            ui.fonts(|f| f.layout_job(layout_job))
         };
 
         let layouter = layouter.unwrap_or(&mut default_layouter);
@@ -428,8 +429,8 @@ impl<'t> TextEdit<'t> {
         // dragging select text, or scroll the enclosing [`ScrollArea`] (if any)?
         // Since currently copying selected text in not supported on `eframe` web,
         // we prioritize touch-scrolling:
-        let any_touches = ui.input().any_touches(); // separate line to avoid double-locking the same mutex
-        let allow_drag_to_select = !any_touches || ui.memory().has_focus(id);
+        let allow_drag_to_select =
+            ui.input(|i| !i.any_touches()) || ui.memory(|mem| mem.has_focus(id));
 
         let sense = if interactive {
             if allow_drag_to_select {
@@ -447,7 +448,7 @@ impl<'t> TextEdit<'t> {
         if interactive {
             if let Some(pointer_pos) = ui.ctx().pointer_interact_pos() {
                 if response.hovered() && text.is_mutable() {
-                    ui.output().mutable_text_under_cursor = true;
+                    ui.output_mut(|o| o.mutable_text_under_cursor = true);
                 }
 
                 // TODO(emilk): drag selected text to either move or clone (ctrl on windows, alt on mac)
@@ -457,7 +458,7 @@ impl<'t> TextEdit<'t> {
 
                 if ui.visuals().text_cursor_preview
                     && response.hovered()
-                    && ui.input().pointer.is_moving()
+                    && ui.input(|i| i.pointer.is_moving())
                 {
                     // preview:
                     paint_cursor_end(
@@ -487,9 +488,9 @@ impl<'t> TextEdit<'t> {
                         secondary: galley.from_ccursor(ccursor_range.secondary),
                     }));
                 } else if allow_drag_to_select {
-                    if response.hovered() && ui.input().pointer.any_pressed() {
-                        ui.memory().request_focus(id);
-                        if ui.input().modifiers.shift {
+                    if response.hovered() && ui.input(|i| i.pointer.any_pressed()) {
+                        ui.memory_mut(|mem| mem.request_focus(id));
+                        if ui.input(|i| i.modifiers.shift) {
                             if let Some(mut cursor_range) = state.cursor_range(&*galley) {
                                 cursor_range.primary = cursor_at_pointer;
                                 state.set_cursor_range(Some(cursor_range));
@@ -499,7 +500,8 @@ impl<'t> TextEdit<'t> {
                         } else {
                             state.set_cursor_range(Some(CursorRange::one(cursor_at_pointer)));
                         }
-                    } else if ui.input().pointer.any_down() && response.is_pointer_button_down_on()
+                    } else if ui.input(|i| i.pointer.any_down())
+                        && response.is_pointer_button_down_on()
                     {
                         // drag to select text:
                         if let Some(mut cursor_range) = state.cursor_range(&*galley) {
@@ -511,14 +513,14 @@ impl<'t> TextEdit<'t> {
             }
         }
 
-        if response.hovered() && interactive {
-            ui.output().cursor_icon = CursorIcon::Text;
+        if interactive && response.hovered() {
+            ui.output_mut(|o| o.cursor_icon = CursorIcon::Text);
         }
 
         let mut cursor_range = None;
         let prev_cursor_range = state.cursor_range(&*galley);
-        if ui.memory().has_focus(id) && interactive {
-            ui.memory().lock_focus(id, lock_focus);
+        if interactive && ui.memory(|mem| mem.has_focus(id)) {
+            ui.memory_mut(|mem| mem.lock_focus(id, lock_focus));
 
             let default_cursor_range = if cursor_at_end {
                 CursorRange::one(galley.end())
@@ -549,7 +551,7 @@ impl<'t> TextEdit<'t> {
 
         // Visual clipping for singleline text editor with text larger than width
         if !multiline {
-            let cursor_pos = match (cursor_range, ui.memory().has_focus(id)) {
+            let cursor_pos = match (cursor_range, ui.memory(|mem| mem.has_focus(id))) {
                 (Some(cursor_range), true) => galley.pos_from_cursor(&cursor_range.primary).min.x,
                 _ => 0.0,
             };
@@ -594,7 +596,7 @@ impl<'t> TextEdit<'t> {
                 galley.paint_with_fallback_color(&painter, response.rect.min, hint_text_color);
             }
 
-            if ui.memory().has_focus(id) {
+            if ui.memory(|mem| mem.has_focus(id)) {
                 if let Some(cursor_range) = state.cursor_range(&*galley) {
                     // We paint the cursor on top of the text, in case
                     // the text galley has backgrounds (as e.g. `code` snippets in markup do).
@@ -618,7 +620,8 @@ impl<'t> TextEdit<'t> {
                         if interactive {
                             // eframe web uses `text_cursor_pos` when showing IME,
                             // so only set it when text is editable and visible!
-                            ui.ctx().output().text_cursor_pos = Some(cursor_pos.left_top());
+                            ui.ctx()
+                                .output_mut(|o| o.text_cursor_pos = Some(cursor_pos.left_top()));
                         }
                     }
                 }
@@ -644,9 +647,7 @@ impl<'t> TextEdit<'t> {
             );
             response
                 .ctx
-                .output()
-                .events
-                .push(OutputEvent::TextSelectionChanged(info));
+                .output_mut(|o| o.events.push(OutputEvent::TextSelectionChanged(info)));
         } else {
             response.widget_info(|| {
                 WidgetInfo::text_edit(
@@ -702,19 +703,19 @@ fn events(
     // We feed state to the undoer both before and after handling input
     // so that the undoer creates automatic saves even when there are no events for a while.
     state.undoer.lock().feed_state(
-        ui.input().time,
+        ui.input(|i| i.time),
         &(cursor_range.as_ccursor_range(), text.as_str().to_owned()),
     );
 
     let copy_if_not_password = |ui: &Ui, text: String| {
         if !password {
-            ui.ctx().output().copied_text = text;
+            ui.ctx().output_mut(|o| o.copied_text = text);
         }
     };
 
     let mut any_change = false;
 
-    let events = ui.input().events.clone(); // avoid dead-lock by cloning. TODO(emilk): optimize
+    let events = ui.input(|i| i.events.clone()); // avoid dead-lock by cloning. TODO(emilk): optimize
     for event in &events {
         let did_mutate_text = match event {
             Event::Copy => {
@@ -758,7 +759,7 @@ fn events(
                 pressed: true,
                 modifiers,
             } => {
-                if multiline && ui.memory().has_lock_focus(id) {
+                if multiline && ui.memory(|mem| mem.has_lock_focus(id)) {
                     let mut ccursor = delete_selected(text, &cursor_range);
                     if modifiers.shift {
                         // TODO(emilk): support removing indentation over a selection?
@@ -782,7 +783,7 @@ fn events(
                     // TODO(emilk): if code editor, auto-indent by same leading tabs, + one if the lines end on an opening bracket
                     Some(CCursorRange::one(ccursor))
                 } else {
-                    ui.memory().surrender_focus(id); // End input with enter
+                    ui.memory_mut(|mem| mem.surrender_focus(id)); // End input with enter
                     break;
                 }
             }
@@ -862,7 +863,7 @@ fn events(
     state.set_cursor_range(Some(cursor_range));
 
     state.undoer.lock().feed_state(
-        ui.input().time,
+        ui.input(|i| i.time),
         &(cursor_range.as_ccursor_range(), text.as_str().to_owned()),
     );
 

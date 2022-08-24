@@ -208,7 +208,7 @@ impl Area {
 
         let layer_id = LayerId::new(order, id);
 
-        let state = ctx.memory().areas.get(id).cloned();
+        let state = ctx.memory(|mem| mem.areas.get(id).cloned());
         let is_new = state.is_none();
         if is_new {
             ctx.request_repaint(); // if we don't know the previous size we are likely drawing the area in the wrong place
@@ -257,7 +257,7 @@ impl Area {
         }
 
         let layer_id = LayerId::new(self.order, self.id);
-        let area_rect = ctx.memory().areas.get(self.id).map(|area| area.rect());
+        let area_rect = ctx.memory(|mem| mem.areas.get(self.id).map(|area| area.rect()));
         if let Some(area_rect) = area_rect {
             let clip_rect = ctx.available_rect();
             let painter = Painter::new(ctx.clone(), layer_id, clip_rect);
@@ -286,7 +286,7 @@ impl Prepared {
     }
 
     pub(crate) fn content_ui(&self, ctx: &Context) -> Ui {
-        let screen_rect = ctx.input().screen_rect();
+        let screen_rect = ctx.input(|i| i.screen_rect());
 
         let bounds = if let Some(bounds) = self.drag_bounds {
             bounds.intersect(screen_rect) // protect against infinite bounds
@@ -356,7 +356,7 @@ impl Prepared {
         );
 
         if move_response.dragged() && movable {
-            state.pos += ctx.input().pointer.delta();
+            state.pos += ctx.input(|i| i.pointer.delta());
         }
 
         // Important check - don't try to move e.g. a combobox popup!
@@ -368,12 +368,12 @@ impl Prepared {
 
         if (move_response.dragged() || move_response.clicked())
             || pointer_pressed_on_area(ctx, layer_id)
-            || !ctx.memory().areas.visible_last_frame(&layer_id)
+            || !ctx.memory(|mem| mem.areas.visible_last_frame(&layer_id))
         {
-            ctx.memory().areas.move_to_top(layer_id);
+            ctx.memory_mut(|mem| mem.areas.move_to_top(layer_id));
             ctx.request_repaint();
         }
-        ctx.memory().areas.set_state(layer_id, state);
+        ctx.memory_mut(|mem| mem.areas.set_state(layer_id, state));
 
         move_response
     }
@@ -381,7 +381,7 @@ impl Prepared {
 
 fn pointer_pressed_on_area(ctx: &Context, layer_id: LayerId) -> bool {
     if let Some(pointer_pos) = ctx.pointer_interact_pos() {
-        let any_pressed = ctx.input().pointer.any_pressed();
+        let any_pressed = ctx.input(|i| i.pointer.any_pressed());
         any_pressed && ctx.layer_id_at(pointer_pos) == Some(layer_id)
     } else {
         false
@@ -389,13 +389,13 @@ fn pointer_pressed_on_area(ctx: &Context, layer_id: LayerId) -> bool {
 }
 
 fn automatic_area_position(ctx: &Context) -> Pos2 {
-    let mut existing: Vec<Rect> = ctx
-        .memory()
-        .areas
-        .visible_windows()
-        .into_iter()
-        .map(State::rect)
-        .collect();
+    let mut existing: Vec<Rect> = ctx.memory(|mem| {
+        mem.areas
+            .visible_windows()
+            .into_iter()
+            .map(State::rect)
+            .collect()
+    });
     existing.sort_by_key(|r| r.left().round() as i32);
 
     let available_rect = ctx.available_rect();

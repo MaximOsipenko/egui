@@ -343,7 +343,7 @@ impl<'a> Slider<'a> {
         if let Some(pointer_position_2d) = response.interact_pointer_pos() {
             let position = self.pointer_position(pointer_position_2d);
             let new_value = if self.smart_aim {
-                let aim_radius = ui.input().aim_radius();
+                let aim_radius = ui.input(|i| i.aim_radius());
                 emath::smart_aim::best_in_range_f64(
                     self.value_from_position(position - aim_radius, position_range.clone()),
                     self.value_from_position(position + aim_radius, position_range.clone()),
@@ -362,9 +362,8 @@ impl<'a> Slider<'a> {
                 SliderOrientation::Vertical => (Key::ArrowUp, Key::ArrowDown),
             };
 
-            let decrement = ui.input().num_presses(dec_key);
-            let increment = ui.input().num_presses(inc_key);
-            let kb_step = increment as f32 - decrement as f32;
+            let kb_step =
+                ui.input(|i| i.num_presses(inc_key) as f32 - i.num_presses(dec_key) as f32);
 
             if kb_step != 0.0 {
                 let prev_value = self.get_value();
@@ -373,7 +372,7 @@ impl<'a> Slider<'a> {
                 let new_value = match self.step {
                     Some(step) => prev_value + (kb_step as f64 * step),
                     None if self.smart_aim => {
-                        let aim_radius = ui.input().aim_radius();
+                        let aim_radius = ui.input(|i| i.aim_radius());
                         emath::smart_aim::best_in_range_f64(
                             self.value_from_position(
                                 new_position - aim_radius,
@@ -479,14 +478,11 @@ impl<'a> Slider<'a> {
 
     fn value_ui(&mut self, ui: &mut Ui, position_range: RangeInclusive<f32>) -> Response {
         // If [`DragValue`] is controlled from the keyboard and `step` is defined, set speed to `step`
-        let change = {
-            // Hold one lock rather than 4 (see https://github.com/emilk/egui/pull/1380).
-            let input = ui.input();
-
-            input.num_presses(Key::ArrowUp) as i32 + input.num_presses(Key::ArrowRight) as i32
-                - input.num_presses(Key::ArrowDown) as i32
-                - input.num_presses(Key::ArrowLeft) as i32
-        };
+        let change = ui.input(|i| {
+            i.num_presses(Key::ArrowUp) as i32 + i.num_presses(Key::ArrowRight) as i32
+                - i.num_presses(Key::ArrowDown) as i32
+                - i.num_presses(Key::ArrowLeft) as i32
+        });
         let speed = match self.step {
             Some(step) if change != 0 => step,
             _ => self.current_gradient(&position_range),
