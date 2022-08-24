@@ -47,51 +47,32 @@ impl TestPanel {
 }
 
 
-fn new_worker(id: usize, on_done_tx: mpsc::SyncSender<()>) -> (JoinHandle<()>, mpsc::SyncSender<egui::Context>) {
-    let (show_tx, show_rc) = mpsc::sync_channel(0);
-    let handle = std::thread::Builder::new().name(format!("EguiPanelWorker {}", id)).spawn(move || {
-        let mut panels = [
-            TestPanel::new("Bob", 42 + id as u32, id),
-            TestPanel::new("Alice", 15 - id as u32, id),
-            TestPanel::new("Cris", 10 * id as u32, id),
-        ];
+type Worker = Box<dyn FnMut(&egui::Context) -> ()>;
+fn new_worker(id: usize) -> Worker {
+    let mut panels = [
+        TestPanel::new("Bob", 42 + id as u32, id),
+        TestPanel::new("Alice", 15 - id as u32, id),
+        TestPanel::new("Cris", 10 * id as u32, id),
+    ];
 
-        while let Ok(ctx) = show_rc.recv() {
-            for panel in &mut panels {
-                panel.show(&ctx)
-            }
-
-            let _ = on_done_tx.send(());
+    Box::new(move |ctx| {
+        for panel in &mut panels {
+            panel.show(&ctx)
         }
-    }).expect("failed to spawn thread");
-    (handle, show_tx)
+    })
 }
 
 
 struct MyApp {
-    workers: Vec<(JoinHandle<()>, mpsc::SyncSender<egui::Context>)>,
-    on_done_tx: mpsc::SyncSender<()>,
-    on_done_rc: mpsc::Receiver<()>,
+    workers: Vec<Worker>
 }
 
 impl MyApp {
     fn new() -> Self {
         let workers = Vec::with_capacity(3);
-        let (on_done_tx, on_done_rc) = mpsc::sync_channel(0);
 
         Self {
             workers,
-            on_done_tx,
-            on_done_rc,
-        }
-    }
-}
-
-impl std::ops::Drop for MyApp {
-    fn drop(&mut self) {
-        for (handle, show_tx) in self.workers.drain(..) {
-            std::mem::drop(show_tx);
-            handle.join().unwrap();
         }
     }
 }
@@ -101,16 +82,12 @@ impl eframe::App for MyApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui.button("add worker").clicked() {
                 let id = self.workers.len();
-                self.workers.push(new_worker(id, self.on_done_tx.clone()))
+                self.workers.push(new_worker(id))
             }
         });
 
-        for (_handle, show_tx) in &self.workers {
-            let _ = show_tx.send(ctx.clone());
-        }
-
-        for _ in 0..self.workers.len() {
-            let _ = self.on_done_rc.recv();
+        for func in &mut self.workers {
+            (func)(ctx);
         }
     }
 }

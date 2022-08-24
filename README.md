@@ -1,8 +1,27 @@
 ## feature spec:
 1) need to remove feature spec from README
 2) methods documentation may be little outdated, since changes where made by "change api and fix all everything that failed to build"
-3) not all libs are currently ready (can be built, especialy integration and/or web code)
-4) changes are easy but breaking, need to write some migration guide
+3) not all libs are currently ready (can be built, especially integration and/or web code)
+4) changes are easy but breaking, need to write some migrations guide
+
+After better performance analysis, it looks like running single thread with no locks is way faster then running multiple threads with locks.
+
+| parallel UI threads | mean `show` time ms | median `show` time ms | how many panels single thread can draw in same time (mean / mean) | how many panels no-lock version can draw in same time (mean / mean) |
+|---------|---------|----------|------|-------|
+| no-lock |  0.61ms |  0.57ms  | 0.26 | 1.00  |
+| 1 |  2.36ms |  2.10ms  | 1.00 | 3.87  |
+| 2 |  2.97ms |  2.42ms  | 1.26 | 4.87  |
+| 3 |  3.41ms |  3.26ms  | 1.44 | 5.59  |
+| 4 |  5.49ms |  5.33ms  | 2.33 | 9.00  |
+| 5 |  6.26ms |  7.07ms  | 2.65 | 10.26 |
+| 6 |  9.99ms |  9.61ms  | 4.23 | 16.38 |
+| 7 | 11.82ms | 11.52ms  | 5.01 | 19.38 |
+| 8 | 15.45ms | 15.34ms  | 6.55 | 25.33 |
+
+Measured on my laptop with 6 by 1.60GHz cores Intel i5-8250U CPU using tracy profiler on panels from hello_world_par project.
+
+OFC this is only about the UI, with ultra-light-weight user logic. Users with more complex logic may want to parallel their UI threads.
+Also, looks like the best solution will be to sync thread-safe Context and thread-unsafe UI exactly twice, when UI created and when UI destroyed, which in ideal world is expected to give us 'no-lock' version performance multiplied by number of parallel threads.
 
 
 # 🖌 egui: an easy-to-use GUI in pure Rust
